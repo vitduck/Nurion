@@ -1,0 +1,75 @@
+# Precompiler options
+CPP_OPTIONS= -DHOST=\"k-ftn-impi-lsci-cfft\" \
+			 -DMPI \
+			 -Duse_collective \
+             -Davoidalloc \
+			 -Duse_shmem \
+             -Dtbdyn  \
+			 -DPROFILING
+
+CPP        = cpp -P -traditional $*$(FUFFIX) $*$(SUFFIX) $(CPP_OPTIONS)
+
+FC         = ftn 
+FCL        = ftn
+
+FREE       = -f free 
+
+FFLAGS     = -eb -m4 -hnoomp 
+OFLAG      = -O3 -hfp3 -hcpu=mic-knl
+OFLAG_IN   = $(OFLAG)
+DEBUG      = -O0
+
+BLAS       = 
+LAPACK     =
+BLACS      = 
+SCALAPACK  = 
+#LLIBS      = -L$(CRAY_LIBSCI_PREFIX_DIR) -lsci_cray
+LLIBS      = -lsci_cray_mpi
+
+OBJECTS    = fftmpiw.o fftmpi_map.o fftw3d.o fft3dlib.o 
+#INCS       = -I/$(FFTW_INC)
+#LLIBS     += $(FFTW_DIR)/libfftw3.a
+
+OBJECTS_O0 += fftw3d.o fftmpi.o fftmpiw.o
+OBJECTS_O1 += fft3dlib.o
+
+# For what used to be vasp.5.lib
+CPP_LIB    = $(CPP)
+FC_LIB     = $(FC)
+CC_LIB     = cc
+CFLAGS_LIB = -O2 
+FFLAGS_LIB = -O2 
+FREE_LIB   = $(FREE)
+
+OBJECTS_LIB= linpack_double.o getshmem.o
+
+# For the parser library
+CXX_PARS   = CC 
+
+LIBS       += parser
+LLIBS      += -Lparser -lparser -lstdc++
+
+# Normally no need to change this
+SRCDIR     = ../../src
+BINDIR     = ../../bin
+
+#================================================
+# GPU Stuff
+
+CPP_GPU    = -DCUDA_GPU -DRPROMU_CPROJ_OVERLAP -DUSE_PINNED_MEMORY -DCUFFT_MIN=28 -UscaLAPACK
+
+OBJECTS_GPU = fftmpiw.o fftmpi_map.o fft3dlib.o fftw3d_gpu.o fftmpiw_gpu.o
+
+CC         = icc
+CXX        = icpc
+CFLAGS     = -fPIC -DADD_ -Wall -openmp -DMAGMA_WITH_MKL -DMAGMA_SETAFFINITY -DGPUSHMEM=300 -DHAVE_CUBLAS
+
+CUDA_ROOT  ?= /usr/local/cuda/
+NVCC       := $(CUDA_ROOT)/bin/nvcc -ccbin=icc
+CUDA_LIB   := -L$(CUDA_ROOT)/lib64 -lnvToolsExt -lcudart -lcuda -lcufft -lcublas
+
+GENCODE_ARCH    := -gencode=arch=compute_30,code=\"sm_30,compute_30\" \
+                   -gencode=arch=compute_35,code=\"sm_35,compute_35\" \
+                   -gencode=arch=compute_60,code=\"sm_60,compute_60\"
+
+MPI_INC    = $(I_MPI_ROOT)/include64/
