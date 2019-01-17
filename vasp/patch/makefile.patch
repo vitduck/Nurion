@@ -1,0 +1,42 @@
+9c9,10
+< OFLAG_1=-O1 
+---
+> OFLAG_0=-O0
+> OFLAG_1=-O1
+82,85c83,87
+< OBJS_O1=$(filter-out $(OBJECTS_O1) $(OBJECTS_O2) $(OBJECTS_O3) $(OBJECTS_IN),$(SOURCE_O1)) $(OBJECTS_O1)
+< OBJS_O2=$(filter-out $(OBJECTS_O1) $(OBJECTS_O2) $(OBJECTS_O3) $(OBJECTS_IN),$(SOURCE_O2)) $(OBJECTS_O2)
+< OBJS_O3=$(filter-out $(OBJECTS_O1) $(OBJECTS_O2) $(OBJECTS_O3) $(OBJECTS_IN),$(SOURCE_O3)) $(OBJECTS_O3)
+< OBJS_IN=$(filter-out $(OBJECTS_O1) $(OBJECTS_O2) $(OBJECTS_O3) $(OBJECTS_IN),$(SOURCE_IN)) $(OBJECTS_IN)
+---
+> OBJS_O0=$(filter-out $(OBJECTS_O0) $(OBJECTS_O1) $(OBJECTS_O2) $(OBJECTS_O3) $(OBJECTS_IN),$(SOURCE_O0)) $(OBJECTS_O0)
+> OBJS_O1=$(filter-out $(OBJECTS_O0) $(OBJECTS_O1) $(OBJECTS_O2) $(OBJECTS_O3) $(OBJECTS_IN),$(SOURCE_O1)) $(OBJECTS_O1)
+> OBJS_O2=$(filter-out $(OBJECTS_O0) $(OBJECTS_O1) $(OBJECTS_O2) $(OBJECTS_O3) $(OBJECTS_IN),$(SOURCE_O2)) $(OBJECTS_O2)
+> OBJS_O3=$(filter-out $(OBJECTS_O0) $(OBJECTS_O1) $(OBJECTS_O2) $(OBJECTS_O3) $(OBJECTS_IN),$(SOURCE_O3)) $(OBJECTS_O3)
+> OBJS_IN=$(filter-out $(OBJECTS_O0) $(OBJECTS_O1) $(OBJECTS_O2) $(OBJECTS_O3) $(OBJECTS_IN),$(SOURCE_IN)) $(OBJECTS_IN)
+86a89
+> F90SRC_O0=$(OBJS_O0:.o=$(SUFFIX))
+91a95,97
+> ifeq ($(FFLAGS_0),)
+>    FFLAGS_0=$(FFLAGS)
+> endif
+104a111,113
+> ifeq ($(OFLAG_0),)
+>    OFLAG_0=$(OFLAG)
+> endif
+114a124,126
+> ifeq ($(INCS_0),)
+>    INCS_0=$(INCS)
+> endif
+148c160,164
+< 
+---
+> 	@echo "!" >> symbol.inc
+> 	@echo "! for verifying compiling information" >> symbol.inc
+> 	@echo "!" >> symbol.inc
+> 	@echo "#define COMPILATION '$(FC) $(FFLAGS) $(OFLAG_IN) $(INCS)'" >> symbol.inc
+> 	@echo "#define LLIBS '$(LLIBS)'" >> symbol.inc
+168a185,187
+> # $(OBJS_O0): $(F90SRC_O0)
+> $(OBJS_O0): %.o: %$(SUFFIX)
+> 	$(FC) $(FREE) $(FFLAGS_0) $(OFLAG_0) $(INCS_0) -c $*$(SUFFIX)
