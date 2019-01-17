@@ -1,0 +1,6 @@
+422a423,427
+> 
+> ! for LAPACK >=3.6 
+> #ifdef LAPACK36
+> #define DGEGV DGGEV
+> #endif
