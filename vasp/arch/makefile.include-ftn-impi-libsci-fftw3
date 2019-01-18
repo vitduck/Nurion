@@ -1,5 +1,5 @@
 # Precompiler options
-CPP_OPTIONS= -DHOST=\"nurion-knl-cray\" \
+CPP_OPTIONS= -DHOST=\"knl-cray\" \
 			 -DMPI \
              -DscaLAPACK \
 			 -Duse_collective \

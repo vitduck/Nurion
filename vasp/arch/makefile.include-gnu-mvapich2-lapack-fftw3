@@ -1,12 +1,12 @@
 # Precompiler options
-CPP_OPTIONS= -DHOST=\"k-gnu-mvap-lapa-fftw\" \
+CPP_OPTIONS= -DHOST=\"knl-gnu-mvapich2\" \
 			 -DMPI \
 			 -DLAPACK36 \
 			 -Duse_collective \
              -Davoidalloc \
 			 -Duse_shmem \
              -Dtbdyn  \
-			 -DPROFILING
+			 -DPROFILING \
 
 CPP        = gcc -E -P -C -w $*$(FUFFIX) >$*$(SUFFIX) $(CPP_OPTIONS)
 
@@ -30,8 +30,12 @@ OBJECTS    = fftmpiw.o fftmpi_map.o  fftw3d.o  fft3dlib.o
 INCS       = -I$(KISTI_APPLIB2)/$(CRAY_CPU_TARGET)/fftw_mpi/3.3.7/include
 LLIBS     += -L$(KISTI_APPLIB2)/$(CRAY_CPU_TARGET)/fftw_mpi/3.3.7/lib -lfftw3
 
-OBJECTS_O1 += fftw3d.o fftmpi.o fftmpiw.o
-OBJECTS_O2 += fft3dlib.o
+OBJECTS_O3 += fftw3d.o fftmpiw.o
+OBJECTS_O3 += fft3dlib.o
+
+OFLAG_1    += -march=knl
+OFLAG_2    += -march=knl
+OFLAG_3    += -ffast-math -march=knl
 
 # For what used to be vasp.5.lib
 CPP_LIB    = $(CPP)
