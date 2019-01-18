@@ -1,8 +1,12 @@
-9c9,10
+9,11c9,12
 < OFLAG_1=-O1 
+< OFLAG_2=-O2 
+< OFLAG_3=-O3 
 ---
 > OFLAG_0=-O0
 > OFLAG_1=-O1
+> OFLAG_2=-O2
+> OFLAG_3=-O3
 82,85c83,87
 < OBJS_O1=$(filter-out $(OBJECTS_O1) $(OBJECTS_O2) $(OBJECTS_O3) $(OBJECTS_IN),$(SOURCE_O1)) $(OBJECTS_O1)
 < OBJS_O2=$(filter-out $(OBJECTS_O1) $(OBJECTS_O2) $(OBJECTS_O3) $(OBJECTS_IN),$(SOURCE_O2)) $(OBJECTS_O2)
@@ -28,15 +32,43 @@
 > ifeq ($(INCS_0),)
 >    INCS_0=$(INCS)
 > endif
-148c160,164
-< 
----
-> 	@echo "!" >> symbol.inc
-> 	@echo "! for verifying compiling information" >> symbol.inc
-> 	@echo "!" >> symbol.inc
-> 	@echo "#define COMPILATION '$(FC) $(FFLAGS) $(OFLAG_IN) $(INCS)'" >> symbol.inc
-> 	@echo "#define LLIBS '$(LLIBS)'" >> symbol.inc
-168a185,187
+147a160,190
+> 	
+> ifdef PE_MPI
+> 	@echo "#define LMPI '$(PE_MPI) $(IMPI_VERSION)'" > nurion.inc
+> endif
+> 
+> ifdef MPI
+> 	@echo "#define LMPI '$(MPI) $(MPI_VER)'" > nurion.inc
+> endif
+> 	
+> 	@echo "#define FC '$(FC) $(FFLAGS) $(OFLAG_IN) $(INCS)'" >> nurion.inc
+> 	@echo "#define LLIBS '$(LLIBS)'" >> nurion.inc
+> 
+> ifdef OBJECTS_O0
+> 	@echo "#define OBJECTS_O0 '$(OBJECTS_O0)'" >> nurion.inc
+> 	@echo "#define OFLAG_0 '$(OFLAG_0)'" >> nurion.inc
+> endif 
+> 
+> ifdef OBJECTS_O1 
+> 	@echo "#define OBJECTS_O1 '$(OBJECTS_O1)'" >> nurion.inc
+> 	@echo "#define OFLAG_1 '$(OFLAG_1)'" >> nurion.inc
+> endif 
+> 
+> ifdef OBJECTS_O2
+> 	@echo "#define OBJECTS_O2 '$(OBJECTS_O2)'" >> nurion.inc
+> 	@echo "#define OFLAG_2 '$(OFLAG_2)'" >> nurion.inc
+> endif 
+> 
+> ifdef OBJECTS_O3
+> 	@echo "#define OBJECTS_O3 '$(OBJECTS_O3)'" >> nurion.inc
+> 	@echo "#define OFLAG_3 '$(OFLAG_3)'" >> nurion.inc
+> endif 
+168a212,214
 > # $(OBJS_O0): $(F90SRC_O0)
 > $(OBJS_O0): %.o: %$(SUFFIX)
 > 	$(FC) $(FREE) $(FFLAGS_0) $(OFLAG_0) $(INCS_0) -c $*$(SUFFIX)
+198c244
+< fft3dlib_f77.o: fft3dlib_f77$(SUFFIX)
+---
+> ft3dlib_f77.o: fft3dlib_f77$(SUFFIX)
