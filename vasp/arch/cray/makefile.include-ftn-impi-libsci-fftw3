@@ -1,6 +1,7 @@
 # Precompiler options
-CPP_OPTIONS= -DHOST=\"k-ftn-impi-lsci-cfft\" \
+CPP_OPTIONS= -DHOST=\"nurion-knl-cray\" \
 			 -DMPI \
+             -DscaLAPACK \
 			 -Duse_collective \
              -Davoidalloc \
 			 -Duse_shmem \
@@ -9,12 +10,12 @@ CPP_OPTIONS= -DHOST=\"k-ftn-impi-lsci-cfft\" \
 
 CPP        = cpp -P -traditional $*$(FUFFIX) $*$(SUFFIX) $(CPP_OPTIONS)
 
-FC         = ftn 
+FC         = ftn
 FCL        = ftn
 
-FREE       = -f free 
+FREE       = -f free
 
-FFLAGS     = -eb -m4 -hnoomp 
+FFLAGS     = -eb -m4 -hnoomp
 OFLAG      = -O3 -hfp3 -hcpu=mic-knl
 OFLAG_IN   = $(OFLAG)
 DEBUG      = -O0
@@ -23,15 +24,23 @@ BLAS       =
 LAPACK     =
 BLACS      = 
 SCALAPACK  = 
-#LLIBS      = -L$(CRAY_LIBSCI_PREFIX_DIR) -lsci_cray
-LLIBS      = -lsci_cray_mpi
+LLIBS      = -lsci_cray_mp
 
 OBJECTS    = fftmpiw.o fftmpi_map.o fftw3d.o fft3dlib.o 
-#INCS       = -I/$(FFTW_INC)
-#LLIBS     += $(FFTW_DIR)/libfftw3.a
+INCS       = -I$(FFTW_INC)
 
-OBJECTS_O0 += fftw3d.o fftmpi.o fftmpiw.o
-OBJECTS_O1 += fft3dlib.o
+# default
+# OBJECTS_O0 += fftw3d.o fftmpiw.o
+# OBJECTS_O1 += fft3dlib.o
+
+# NCORE=1
+OBJECTS_O0 += fftmpiw.o
+OBJECTS_O3 += fftw3d.o fft3dlib.o
+
+OFLAG_0    += -hcpu=mic-knl
+OFLAG_1    += -hfp3 -hcpu=mic-knl
+OFLAG_2    += -hfp3 -hcpu=mic-knl
+OFLAG_3    += -hfp3 -hcpu=mic-knl
 
 # For what used to be vasp.5.lib
 CPP_LIB    = $(CPP)
