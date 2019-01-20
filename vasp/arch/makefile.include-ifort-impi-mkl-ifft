@@ -1,0 +1,96 @@
+# Precompiler options
+CPP_OPTIONS= -DHOST=\"knl-intel\" \
+			 -DMPI \
+             -DscaLAPACK \
+			 -Duse_collective \
+             -Davoidalloc \
+			 -Duse_shmem \
+             -Dtbdyn  \
+			 -DPROFILING
+
+CPP        = fpp -f_com=no -free -w0 $*$(FUFFIX) $*$(SUFFIX) $(CPP_OPTIONS)
+
+FC         = mpiifort
+FCL        = mpiifort -lstdc++
+
+FREE       = -free -names lowercase
+
+FFLAGS     = -assume byterecl
+
+# OFLAG      = -O0
+# OFLAG      = -O2 
+# OFLAG      = -O3
+# OFLAG      = -Ofast
+OFLAG      = -Ofast -xMIC-AVX512
+
+OFLAG_IN   = $(OFLAG)
+DEBUG      = -O0
+
+BLAS       = -lmkl_core -lmkl_intel_lp64 -lmkl_sequential
+#BLAS       = -lmkl_core -lmkl_intel_lp64 -lmkl_intel_thread -liomp5
+LAPACK     =
+BLACS      = -lmkl_blacs_intelmpi_lp64
+SCALAPACK  = -lmkl_scalapack_lp64
+LLIBS      = -L$(MKLROOT)/lib/intel64 $(SCALAPACK) $(BLACS) $(BLAS)
+
+OBJECTS    =  fftmpiw.o fftmpi_map.o fftw3d.o fft3dlib.o 
+INCS       = -I$(MKLROOT)/include/fftw
+
+# no opt
+# OBJECTS_O0 += fftw3d.o fftmpiw.o
+# OBJECTS_O0 += fft3dlib.o 
+# OFLAG_1    = -O0
+# OFLAG_2    = -O0 
+
+# default opt 
+# OBJECTS_O1 += fftw3d.o 
+# OBJECTS_O2 += fft3dlib.o fftmpiw.o
+
+# max opt
+OBJECTS_O1 += fftw3d.o 
+OBJECTS_O3 += fft3dlib.o fftmpiw.o
+
+OFLAG_1    += -xMIC-AVX512
+OFLAG_2    += -xMIC-AVX512
+OFLAG_3     = -Ofast -xMIC-AVX512
+
+# For what used to be vasp.5.lib
+CPP_LIB    = $(CPP)
+FC_LIB     = $(FC)
+CC_LIB     = icc
+CFLAGS_LIB = -O2
+FFLAGS_LIB = -O2
+FREE_LIB   = $(FREE)
+
+OBJECTS_LIB= linpack_double.o getshmem.o
+
+# For the parser library
+CXX_PARS   = icpc
+
+LIBS       += parser
+LLIBS      += -Lparser -lparser -lstdc++
+
+# Normally no need to change this
+SRCDIR     = ../../src
+BINDIR     = ../../bin
+
+#================================================
+# GPU Stuff
+
+CPP_GPU    = -DCUDA_GPU -DRPROMU_CPROJ_OVERLAP -DUSE_PINNED_MEMORY -DCUFFT_MIN=28 -UscaLAPACK
+
+OBJECTS_GPU = fftmpiw.o fftmpi_map.o fft3dlib.o fftw3d_gpu.o fftmpiw_gpu.o
+
+CC         = icc
+CXX        = icpc
+CFLAGS     = -fPIC -DADD_ -Wall -openmp -DMAGMA_WITH_MKL -DMAGMA_SETAFFINITY -DGPUSHMEM=300 -DHAVE_CUBLAS
+
+CUDA_ROOT  ?= /usr/local/cuda/
+NVCC       := $(CUDA_ROOT)/bin/nvcc -ccbin=icc
+CUDA_LIB   := -L$(CUDA_ROOT)/lib64 -lnvToolsExt -lcudart -lcuda -lcufft -lcublas
+
+GENCODE_ARCH    := -gencode=arch=compute_30,code=\"sm_30,compute_30\" \
+                   -gencode=arch=compute_35,code=\"sm_35,compute_35\" \
+                   -gencode=arch=compute_60,code=\"sm_60,compute_60\"
+
+MPI_INC    = $(I_MPI_ROOT)/include64/

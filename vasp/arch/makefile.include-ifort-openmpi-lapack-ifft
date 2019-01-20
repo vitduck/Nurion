@@ -1,5 +1,5 @@
 # Precompiler options
-CPP_OPTIONS= -DHOST=\"ifort-ompi-lapa-ifft\" \
+CPP_OPTIONS= -DHOST=\"knl-intel-lapack\" \
 			 -DMPI \
 			 -DLAPACK36 \
              -Davoidalloc \
@@ -22,16 +22,20 @@ DEBUG      = -O0
 
 BLAS       = $(KISTI_APPLIB1)/$(CRAY_CPU_TARGET)/lapack/3.7.0/libblas.a
 LAPACK     = $(KISTI_APPLIB1)/$(CRAY_CPU_TARGET)/lapack/3.7.0/liblapack.a
-BLACS      = 
-SCALAPACK  =  
+BLACS      = -lmkl_blacs_openmpi_lp64
+SCALAPACK  = -lmkl_scalapack_lp64 -lmkl_core -lmkl_intel_lp64 -lmkl_sequential
 LLIBS      = -Wl,--start-group $(BLAS) $(LAPACK) -Wl,--end-group \
-			 -L$(MKLROOT)/lib/intel64 -lmkl_core -lmkl_intel_lp64 -lmkl_sequential
+			 -L$(MKLROOT)/lib/intel64 $(BLACS) $(SCALAPACK)
 
 OBJECTS    = fftmpiw.o fftmpi_map.o fftw3d.o fft3dlib.o 
 INCS       =-I$(MKLROOT)/include/fftw
 
-OBJECTS_O1 += fftw3d.o fftmpi.o fftmpiw.o
-OBJECTS_O2 += fft3dlib.o
+OBJECTS_O1 += fftw3d.o 
+OBJECTS_O3 += fft3dlib.o fftmpiw.o
+
+OFLAG_1    += -xMIC-AVX512
+OFLAG_2    += -xMIC-AVX512
+OFLAG_3     = -Ofast -xMIC-AVX512
 
 # For what used to be vasp.5.lib
 CPP_LIB    = $(CPP)

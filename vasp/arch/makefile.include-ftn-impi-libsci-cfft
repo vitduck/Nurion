@@ -1,5 +1,5 @@
 # Precompiler options
-CPP_OPTIONS= -DHOST=\"ifort-ompi-mkl-ifft\" \
+CPP_OPTIONS= -DHOST=\"nurion-knl-cray\" \
 			 -DMPI \
              -DscaLAPACK \
 			 -Duse_collective \
@@ -8,42 +8,52 @@ CPP_OPTIONS= -DHOST=\"ifort-ompi-mkl-ifft\" \
              -Dtbdyn  \
 			 -DPROFILING
 
-CPP        = fpp -f_com=no -free -w0 $*$(FUFFIX) $*$(SUFFIX) $(CPP_OPTIONS)
+CPP        = cpp -P -traditional $*$(FUFFIX) $*$(SUFFIX) $(CPP_OPTIONS)
 
-FC         = mpif90
-FCL        = mpif90 -lstdc++
+FC         = ftn
+FCL        = ftn
 
-FREE       = -free -names lowercase
+FREE       = -f free
 
-FFLAGS     = -assume byterecl -w -qopenmp
-OFLAG      = -O3 -xMIC-AVX512
+FFLAGS     = -eb -m4 -hnoomp
+OFLAG      = -O3 -hfp3 -hcpu=mic-knl
 OFLAG_IN   = $(OFLAG)
 DEBUG      = -O0
 
-BLAS       = -lmkl_core -lmkl_intel_lp64 -lmkl_sequential
+BLAS       = 
 LAPACK     =
-BLACS      = -lmkl_blacs_openmpi_lp64
-SCALAPACK  = -lmkl_scalapack_lp64
-LLIBS      = -L$(MKLROOT)/lib/intel64 $(SCALAPACK) $(BLACS) $(BLAS)
+BLACS      = 
+SCALAPACK  = 
+LLIBS      = -lsci_cray_mp
 
-OBJECTS    =  fftmpiw.o fftmpi_map.o fftw3d.o fft3dlib.o 
-INCS       = -I$(MKLROOT)/include/fftw
+OBJECTS    = fftmpiw.o fftmpi_map.o fftw3d.o fft3dlib.o 
+INCS       = -I$(FFTW_INC)
 
-OBJECTS_O1 += fftw3d.o fftmpi.o fftmpiw.o
-OBJECTS_O2 += fft3dlib.o
+# default
+# OBJECTS_O0 += fftw3d.o fftmpiw.o
+# OBJECTS_O1 += fft3dlib.o
+
+# NCORE=1
+OBJECTS_O0 += fftmpiw.o
+OBJECTS_O3 += fftw3d.o fft3dlib.o
+
+OFLAG_0    += -hcpu=mic-knl
+OFLAG_1    += -hfp3 -hcpu=mic-knl
+OFLAG_2    += -hfp3 -hcpu=mic-knl
+OFLAG_3    += -hfp3 -hcpu=mic-knl
 
 # For what used to be vasp.5.lib
 CPP_LIB    = $(CPP)
 FC_LIB     = $(FC)
-CC_LIB     = icc
-CFLAGS_LIB = -O2
-FFLAGS_LIB = -O2
+CC_LIB     = cc
+CFLAGS_LIB = -O2 
+FFLAGS_LIB = -O2 
 FREE_LIB   = $(FREE)
 
 OBJECTS_LIB= linpack_double.o getshmem.o
 
 # For the parser library
-CXX_PARS   = icpc
+CXX_PARS   = CC 
 
 LIBS       += parser
 LLIBS      += -Lparser -lparser -lstdc++

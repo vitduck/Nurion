@@ -1,9 +1,9 @@
 # Precompiler options
-CPP_OPTIONS= -DHOST=\"ifort-ompi-lapa-fftw\" \
+CPP_OPTIONS= -DHOST=\"knl-intel-fftw3\" \
 			 -DMPI \
-			 -DLAPACK36 \
-             -Davoidalloc \
+			 -DscaLAPACK \
 			 -Duse_collective \
+             -Davoidalloc \
 			 -Duse_shmem \
              -Dtbdyn  \
 			 -DPROFILING
@@ -13,25 +13,29 @@ CPP        = fpp -f_com=no -free -w0 $*$(FUFFIX) $*$(SUFFIX) $(CPP_OPTIONS)
 FC         = mpif90
 FCL        = mpif90 -lstdc++
 
-FREE       = -free -names lowercase -qopenmp
+FREE       = -free -names lowercase
 
 FFLAGS     = -assume byterecl -w
 OFLAG      = -Ofast -xMIC-AVX512
 OFLAG_IN   = $(OFLAG)
 DEBUG      = -O0
 
-BLAS       = $(KISTI_APPLIB1)/$(CRAY_CPU_TARGET)/lapack/3.7.0/libblas.a
-LAPACK     = $(KISTI_APPLIB1)/$(CRAY_CPU_TARGET)/lapack/3.7.0/liblapack.a
-BLACS      = 
-SCALAPACK  =  
-LLIBS      = -Wl,--start-group $(BLAS) $(LAPACK) -Wl,--end-group \
-			 -L$(KISTI_APPLIB2)/$(CRAY_CPU_TARGET)/fftw_mpi/3.3.7/lib -lfftw3
+BLAS       = -lmkl_core -lmkl_intel_lp64 -lmkl_sequential
+LAPACK     =
+BLACS      = -lmkl_blacs_intelmpi_lp64
+SCALAPACK  = -lmkl_scalapack_lp64
+LLIBS      = -L$(KISTI_APPLIB2)/$(CRAY_CPU_TARGET)/fftw_mpi/3.3.7/lib -lfftw3 \
+             -L$(MKLROOT)/lib/intel64 $(SCALAPACK) $(BLACS) $(BLAS)
 
 OBJECTS    = fftmpiw.o fftmpi_map.o fftw3d.o fft3dlib.o 
 INCS       = -I$(KISTI_APPLIB2)/$(CRAY_CPU_TARGET)/fftw_mpi/3.3.7/include
 
-OBJECTS_O1 += fftw3d.o fftmpi.o fftmpiw.o
-OBJECTS_O2 += fft3dlib.o
+OBJECTS_O1 += fftw3d.o  
+OBJECTS_O3 += fft3dlib.o fftmpiw.o
+
+OFLAG_1    += -xMIC-AVX512
+OFLAG_2    += -xMIC-AVX512
+OFLAG_3     = -Ofast -xMIC-AVX512
 
 # For what used to be vasp.5.lib
 CPP_LIB    = $(CPP)
