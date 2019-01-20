@@ -17,8 +17,8 @@ parse_mkl_header( \ my %scalapack, "$ENV{MKLROOT}/include/mkl_scalapack.h" );
 
 parse_mkl_verbose( \%blas, \%lapack, \%scalapack ); 
 
-tabulate_mkl( \%blas,        'blas'     ); 
-tabulate_mkl( \%lapack,     'lapack'    ); 
+tabulate_mkl( \%blas,      'blas'     ); 
+tabulate_mkl( \%lapack,    'lapack'    ); 
 tabulate_mkl( \%scalapack, 'scalapack' ); 
 
 # -----------#
@@ -46,13 +46,13 @@ sub parse_mkl_verbose {
         if ( /MKL_VERBOSE (\w+)\(.*\) (\d+\.?\d+)(m|u|n)/ ) { 
             if ( exists $blas->{$1} ) {  
                 $blas->{$1}[0]++; 
-                $blas->{$1}[1] = $2 * $unit{$3}; 
+                $blas->{$1}[1] += $2 * $unit{$3}; 
             } elsif ( exists $lapack->{$1} ) {
                 $lapack->{$1}[0]++; 
-                $lapack->{$1}[1] = $2 * $unit{$3}; 
+                $lapack->{$1}[1] += $2 * $unit{$3}; 
             } elsif ( exists $scalapack->{$1} ) { 
                 $scalapack->{$1}[0]++; 
-                $scalapack->{$1}[1] = $2 * $unit{$3}; 
+                $scalapack->{$1}[1] += $2 * $unit{$3}; 
             }
         }
     }
