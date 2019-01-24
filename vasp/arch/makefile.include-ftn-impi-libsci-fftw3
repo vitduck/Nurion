@@ -1,5 +1,5 @@
 # Precompiler options
-CPP_OPTIONS= -DHOST=\"nurion-cray_libsci\" \
+CPP_OPTIONS= -DHOST=\"nurion-cray-fftw3\" \
 			 -DMPI \
              -DscaLAPACK \
 			 -Duse_collective \
@@ -10,12 +10,12 @@ CPP_OPTIONS= -DHOST=\"nurion-cray_libsci\" \
 
 CPP        = cpp -P -traditional $*$(FUFFIX) $*$(SUFFIX) $(CPP_OPTIONS)
 
-FC         = ftn
+FC         = ftn 
 FCL        = ftn -h noomp
 
 FREE       = -f free
 
-FFLAGS     = -eb -m4 -h noomp
+FFLAGS     = -e b -m 4 -h noomp
 OFLAG      = -O3 -h fp3
 OFLAG_IN   = $(OFLAG)
 DEBUG      = -O0
@@ -24,18 +24,20 @@ BLAS       =
 LAPACK     =
 BLACS      = 
 SCALAPACK  = 
-LLIBS      = -lsci_cray_mpi
+LLIBS      = -L$(HOME)/benchmark/lib -lfftw3 \
+             -lsci_cray_mpi  
 
 OBJECTS    = fftmpiw.o fftmpi_map.o fftw3d.o fft3dlib.o 
-INCS       = -I$(FFTW_INC)
+INCS       = -I$(HOME)/benchmark/include/fftw
 
+# NCORE=1
 OBJECTS_O0 += fftmpiw.o
 OBJECTS_O3 += fftw3d.o fft3dlib.o
 
-OFLAG_0    += 
-OFLAG_1    += -hfp3 
-OFLAG_2    += -hfp3 
-OFLAG_3    += -hfp3 
+OFLAG_0    +=
+OFLAG_1    += -h fp3 -h noomp
+OFLAG_2    += -h fp3 -h noomp
+OFLAG_3    += -h fp3 -h noomp
 
 # For what used to be vasp.5.lib
 CPP_LIB    = $(CPP)

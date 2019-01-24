@@ -4,6 +4,7 @@ use strict;
 use warnings; 
 
 use Data::Printer; 
+use File::Find; 
 use List::Util qw/sum/; 
 
 my @fft_routines = qw/ 
@@ -39,7 +40,7 @@ for my $outcar ( @ARGV ) {
         my $mpi = get_routines( @mpi_routines ); 
 
         printf( 
-            "%-30s\t%12.5f\t%12.5f\t%12.5f\t%12.5f\n", 
+            "%s %12.5f %12.5f %12.5f %12.5f\n", 
             $outcar,
             $fft, 
             $mpi, 
