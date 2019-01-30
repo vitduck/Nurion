@@ -1,12 +1,12 @@
 # Precompiler options
 CPP_OPTIONS= -DHOST=\"ftn-impi-libsci-fftw3\" \
-			 -DMPI \
+             -DMPI \
              -DscaLAPACK \
-			 -Duse_collective \
+             -Duse_collective \
              -Davoidalloc \
-			 -Duse_shmem \
+             -Duse_shmem \
              -Dtbdyn  \
-			 -DPROFILING
+             -DPROFILING
 
 CPP        = cpp -P -traditional $*$(FUFFIX) $*$(SUFFIX) $(CPP_OPTIONS)
 
@@ -16,7 +16,7 @@ FCL        = ftn
 FREE       = -f free
 
 FFLAGS     = -e b -m 4
-OFLAG      = -O3 -h pic,fp3,scalar3,cache3,aggress
+OFLAG      = -O3 -h pic,fp3,scalar3,cache3,aggress,ipa5
 OFLAG_IN   = $(OFLAG)
 DEBUG      = -O0
 
@@ -33,7 +33,7 @@ INCS       = -I$(HOME)/benchmark/include/fftw3
 OBJECTS_O0 += fftmpiw.o
 OBJECTS_O3 += fftw3d.o fft3dlib.o
 
-OFLAG_0    +=
+OFLAG_0    = $(OFLAG) -h vector0
 OFLAG_1    = $(OFLAG)
 OFLAG_2    = $(OFLAG)
 OFLAG_3    = $(OFLAG)
