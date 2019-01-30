@@ -13,13 +13,13 @@ my %unit = (
 
 parse_mkl_header( \ my %blas,      "$ENV{MKLROOT}/include/mkl_blas.h"      ); 
 parse_mkl_header( \ my %lapack,    "$ENV{MKLROOT}/include/mkl_lapack.h"    ); 
-parse_mkl_header( \ my %scalapack, "$ENV{MKLROOT}/include/mkl_scalapack.h" ); 
+#parse_mkl_header( \ my %scalapack, "$ENV{MKLROOT}/include/mkl_scalapack.h" ); 
 
-parse_mkl_verbose( \%blas, \%lapack, \%scalapack ); 
+parse_mkl_verbose( \%blas, \%lapack ); 
 
 tabulate_mkl( \%blas,      'blas'     ); 
 tabulate_mkl( \%lapack,    'lapack'    ); 
-tabulate_mkl( \%scalapack, 'scalapack' ); 
+# tabulate_mkl( \%scalapack, 'scalapack' ); 
 
 # -----------#
 # SUBROUTINE #

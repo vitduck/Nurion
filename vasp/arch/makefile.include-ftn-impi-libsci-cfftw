@@ -1,5 +1,5 @@
 # Precompiler options
-CPP_OPTIONS= -DHOST=\"nurion-cray_libsci\" \
+CPP_OPTIONS= -DHOST=\"ftn-impi-libsci-cfftw\" \
 			 -DMPI \
              -DscaLAPACK \
 			 -Duse_collective \
@@ -11,44 +11,46 @@ CPP_OPTIONS= -DHOST=\"nurion-cray_libsci\" \
 CPP        = cpp -P -traditional $*$(FUFFIX) $*$(SUFFIX) $(CPP_OPTIONS)
 
 FC         = ftn
-FCL        = ftn -h noomp
+FCL        = ftn
 
 FREE       = -f free
 
-FFLAGS     = -eb -m4 -h noomp
-OFLAG      = -O3 -h fp3
+FFLAGS     = -e b -m 4
+OFLAG      = -O3 -h pic,fp3,scalar3,cache3,aggress
 OFLAG_IN   = $(OFLAG)
 DEBUG      = -O0
 
-BLAS       = 
+BLAS       =
 LAPACK     =
-BLACS      = 
-SCALAPACK  = 
-LLIBS      = -lsci_cray_mpi
+BLACS      =
+SCALAPACK  =
 
-OBJECTS    = fftmpiw.o fftmpi_map.o fftw3d.o fft3dlib.o 
+LLIBS      = -lsci_cray_mpi_mp
+
+OBJECTS    = fftmpiw.o fftmpi_map.o fftw3d.o fft3dlib.o
 INCS       = -I$(FFTW_INC)
 
+# NCORE=1
 OBJECTS_O0 += fftmpiw.o
 OBJECTS_O3 += fftw3d.o fft3dlib.o
 
-OFLAG_0    += 
-OFLAG_1    += -hfp3 
-OFLAG_2    += -hfp3 
-OFLAG_3    += -hfp3 
+OFLAG_0    +=
+OFLAG_1    = $(OFLAG)
+OFLAG_2    = $(OFLAG)
+OFLAG_3    = $(OFLAG)
 
 # For what used to be vasp.5.lib
 CPP_LIB    = $(CPP)
 FC_LIB     = $(FC)
 CC_LIB     = cc
-CFLAGS_LIB = -O2 
-FFLAGS_LIB = -O2 
+CFLAGS_LIB = $(OFALG)
+FFLAGS_LIB = $(OFLAG) $(FFLAGS)
 FREE_LIB   = $(FREE)
 
 OBJECTS_LIB= linpack_double.o getshmem.o
 
 # For the parser library
-CXX_PARS   = CC 
+CXX_PARS   = CC
 
 LIBS       += parser
 LLIBS      += -Lparser -lparser -lstdc++
