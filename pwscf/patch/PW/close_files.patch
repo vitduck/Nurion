@@ -1,0 +1,17 @@
+--- ../../../q-e-qe-6.3MaX/PW/src/close_files.f90	2018-06-30 01:21:56.000000000 +0900
++++ PW/src/close_files.f90	2019-03-04 13:42:05.000000000 +0900
+@@ -33,8 +33,14 @@
+   !  ... wavefunctions are written in xml format, save otherwise
+   !
+   IF ( lflag .AND. (twfcollect .OR. io_level < 0 )) THEN
++#if defined __CRAY
++    !DOR$ NOCLONE 
++#endif
+      CALL close_buffer ( iunwfc, 'DELETE' )
+   ELSE
++#if defined __CRAY
++    !DIRS NOCLONE
++#endif
+      CALL close_buffer ( iunwfc, 'KEEP' )
+   END IF
+   !

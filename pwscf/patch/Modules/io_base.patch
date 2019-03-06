@@ -1,0 +1,23 @@
+--- ../../../q-e-qe-6.3MaX/Modules/io_base.f90	2018-06-30 01:21:56.000000000 +0900
++++ Modules/io_base.f90	2019-03-04 18:11:28.000000000 +0900
+@@ -581,6 +581,9 @@
+          END IF
+          !
+          rho_g = 0
++#if defined __CRAY 
++!DIR$ NOCLONE 
++#endif
+          CALL mergewf( rhoaux, rho_g, ngm, ig_l2g, me_in_group, &
+               nproc_in_group, root_in_group, intra_group_comm )
+          !
+@@ -787,7 +790,9 @@
+          !
+          IF ( readmill ) CALL charge_k_to_g (ngm_g_, rho_g, mill_g, &
+               root_in_group,intra_group_comm)
+-         !
++#if defined __CRAY
++!DIR$ NOCLONE
++#endif
+          CALL splitwf( rhoaux, rho_g, ngm, ig_l2g, me_in_group, &
+               nproc_in_group, root_in_group, intra_group_comm )
+          DO ig = 1, ngm

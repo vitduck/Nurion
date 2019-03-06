@@ -1,0 +1,12 @@
+--- ../../../q-e-qe-6.3MaX/PW/src/add_qexsd_step.f90	2018-06-30 01:21:56.000000000 +0900
++++ PW/src/add_qexsd_step.f90	2019-03-05 17:39:56.000000000 +0900
+@@ -12,6 +12,9 @@
+  
+ !----------------------------------------------------------------
+ SUBROUTINE add_qexsd_step(i_step)
++#if defined __CRAY
++!DIR$ OPTIMIZE(-O0)
++#endif
+ #if defined (__OLDXML)
+ CONTINUE 
+ #else

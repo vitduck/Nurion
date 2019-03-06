@@ -1,0 +1,30 @@
+--- ../../../q-e-qe-6.3MaX/PW/src/pw_restart_new.f90	2018-06-30 01:21:56.000000000 +0900
++++ PW/src/pw_restart_new.f90	2019-03-05 17:17:53.000000000 +0900
+@@ -42,6 +42,10 @@
+ #if !defined(__OLDXML)
+     !------------------------------------------------------------------------
+     SUBROUTINE pw_write_schema( )
++#if defined __CRAY
++    !DIR$ OPTIMIZE(-O0)
++#endif
++
+       !------------------------------------------------------------------------
+       !
+       USE control_flags,        ONLY : istep, twfcollect, conv_ions, &
+@@ -649,6 +653,7 @@
+     !
+     !-----------------------------------------------------------------------
+     SUBROUTINE gk_l2gmap_kdip( npw_g, ngk_g, ngk, igk_l2g, igk_l2g_kdip, igwk )
++    !DIR$ OPTIMIZE(-O0)
+       !-----------------------------------------------------------------------
+       !
+       ! ... This subroutine maps local G+k index to the global G vector index
+@@ -712,6 +717,8 @@
+       igwk_lup = 0
+ !$omp end workshare
+ !$omp do
++#if defined __CRAY 
++#endif
+       DO ig_ = 1, ngk_g
+          igwk_lup(igwk_(ig_)) = ig_
+       END DO
