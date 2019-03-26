@@ -1,0 +1,9 @@
+#0  0x00002aaab69751d7 in raise () from /lib64/libc.so.6
+#1  0x00002aaab69768c8 in abort () from /lib64/libc.so.6
+#2  0x00002aaab5977ec2 in _ferr () from /opt/cray/cce/8.6.3/cce/x86_64/lib/libf.so.1
+#3  0x00002aaab596e5b7 in _CLS () from /opt/cray/cce/8.6.3/cce/x86_64/lib/libf.so.1
+#4  0x00002aaab596e720 in _CLOSE () from /opt/cray/cce/8.6.3/cce/x86_64/lib/libf.so.1
+#5  0x000000000086c549 in close_buffer$buffers__clone_29020_1551770217_7_ () at close_files.f90:66
+#6  0x0000000000866a37 in close_files_ () at close_files.f90:9
+#7  0x000000000072434f in stop_run_ () at stop_run.f90:45
+#8  0x000000000040722a in pwscf_ () at pwscf.f90:89

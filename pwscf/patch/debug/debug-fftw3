@@ -1,0 +1,15 @@
+#0  0x00002aaaab959f2c in awake () from /opt/cray/lib64/libfftw3.so.mpi31.3
+#1  0x00002aaaab9520d6 in fftw_plan_awake () from /opt/cray/lib64/libfftw3.so.mpi31.3
+#2  0x00002aaaab9520d6 in fftw_plan_awake () from /opt/cray/lib64/libfftw3.so.mpi31.3
+#3  0x00002aaaab9520d6 in fftw_plan_awake () from /opt/cray/lib64/libfftw3.so.mpi31.3
+#4  0x00002aaaaba01ea1 in fftw_destroy_plan () from /opt/cray/lib64/libfftw3.so.mpi31.3
+#5  0x000000000101f255 in init_plan$cft_1z$fft_scalar_fftw3_ () at fft_scalar.FFTW3.f90:151
+#6  0x00000000010218c4 in cft_1z$fft_scalar_fftw3_ () at fft_scalar.FFTW3.f90:104
+#7  0x0000000001031848 in tg_cft3s$fft_parallel_ () at fft_parallel.f90:121
+#8  0x000000000101d6b5 in invfft_y_ () at fft_fwinv.f90:66
+#9  0x000000000072379d in setlocal_ () at setlocal.f90:14
+#10 0x00000000009d738f in hinit0_ () at hinit0.f90:86
+#11 0x00000000005d1b49 in init_run_ () at init_run.f90:113
+#12 0x00000000006fb13f in reset_gvectors_ () at run_pwscf.f90:311
+#13 0x00000000006fad7d in run_pwscf_ () at run_pwscf.f90:219
+#14 0x0000000000407217 in pwscf_ () at pwscf.f90:72

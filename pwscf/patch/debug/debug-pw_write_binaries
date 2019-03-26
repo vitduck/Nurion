@@ -1,0 +1,13 @@
+#0  0x00002aaab69bb864 in malloc_consolidate () from /lib64/libc.so.6
+#1  0x00002aaab69bd385 in _int_malloc () from /lib64/libc.so.6
+#2  0x00002aaab69be145 in _int_memalign () from /lib64/libc.so.6
+#3  0x00002aaab69c0875 in memalign () from /lib64/libc.so.6
+#4  0x00002aaab69c255c in posix_memalign () from /lib64/libc.so.6
+#5  0x00002aaab6196b87 in _fmemalign () from /opt/cray/cce/8.6.3/cce/x86_64/lib/libcsup.so.1
+#6  0x00002aaab59b0fc6 in __ALLOCATE () from /opt/cray/cce/8.6.3/cce/x86_64/lib/libf.so.1
+#7  0x0000000000ddefb2 in mergekg$mp_wave_ () at mp_wave.f90:123
+#8  0x0000000000c80364 in write_wfc$io_base_ () at io_base.f90:117
+#9  0x00000000005df2bb in pw_write_binaries$pw_restart_new_ () at pw_restart_new.f90:515
+#10 0x00000000005d6741 in punch_ () at punch.f90:95
+#11 0x0000000000625831 in run_pwscf_ () at run_pwscf.f90:9
+#12 0x00000000004097cb in pwscf_ () at pwscf.f90:73

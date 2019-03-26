@@ -1,0 +1,12 @@
+--- ../../../intel/PW/src/pw_init_qexsd_input.f90	2018-06-30 01:21:56.000000000 +0900
++++ pw_init_qexsd_input.f90	2019-03-05 16:06:44.000000000 +0900
+@@ -7,6 +7,9 @@
+ !
+   !--------------------------------------------------------------------------------------------------------------------
+   SUBROUTINE pw_init_qexsd_input(obj,obj_tagname)
++#if defined __CRAY
++!DIR$ OPTIMIZE(-O0)
++#endif
+   !--------------------------------------------------------------------------------------------------------------------
+   !  This routine builds an XML input file, taking the values from the variables
+   !  contained in input_parameters MODULE. To work correctly it must be called before

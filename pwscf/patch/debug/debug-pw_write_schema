@@ -1,0 +1,6 @@
+#0  qes_init_total_energy$qes_libs_module_ () at qes_libs.f90:4923
+#1  0x0000000000e48162 in qexsd_init_total_energy$qexsd_module_ () at qexsd.f90:1105
+#2  0x00000000006a8eb2 in pw_write_schema$pw_restart_new_ () at pw_restart_new.f90:426
+#3  0x00000000006a49af in punch_ () at punch.f90:73
+#4  0x00000000006f3cb3 in run_pwscf_ () at run_pwscf.f90:9
+#5  0x0000000000407217 in pwscf_ () at pwscf.f90:72
