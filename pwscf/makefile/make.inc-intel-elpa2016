@@ -52,7 +52,7 @@ FDFLAGS        = $(DFLAGS) $(MANUAL_DFLAGS)
 
 IFLAGS         = -I$(TOPDIR)/include -I$(TOPDIR)/FoX/finclude -I$(TOPDIR)/S3DE/iotk/include/ \
                  -I/apps/compiler/intel/18.0.3/mkl/include \
-                 -I/home01/pop19/build/include/$(COMPILER)/$(COMPILER_VER)/$(CRAY_CPU_TARGET)/elpa/2016.11.001.pre/modules
+                 -I/$(HOME)/benchmark/lib/$(COMPILER)/$(COMPILER_VER)/$(MPI)/$(KISTI_MPI_VER)/$(CRAY_CPU_TARGET)/elpa/2016.11.001.pre/include/modules
 
 # MOD_FLAG = flag used by f90 compiler to locate modules
 
@@ -143,7 +143,7 @@ BLAS_LIBS_SWITCH = external
 LAPACK_LIBS    = 
 LAPACK_LIBS_SWITCH = external
 
-SCALAPACK_LIBS = /home01/pop19/build/lib/$(COMPILER)/$(COMPILER_VER)/$(CRAY_CPU_TARGET)/elpa/2016.11.001.pre/libelpa.a \
+SCALAPACK_LIBS = $(HOME)/benchmark/lib/$(COMPILER)/$(COMPILER_VER)/$(MPI)/$(KISTI_MPI_VER)/$(CRAY_CPU_TARGET)/elpa/2016.11.001.pre/lib/libelpa.a \
                  -lmkl_scalapack_lp64 -lmkl_blacs_intelmpi_lp64
 
 # nothing needed here if the the internal copy of FFTW is compiled

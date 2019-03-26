@@ -130,7 +130,7 @@ LD_LIBS        =
 # BLAS_LIBS = /your/path/to/espresso/LAPACK/blas.a
 # BLAS_LIBS_SWITCH = internal
 
-BLAS_LIBS        = $(KISTI_APPLIB1)/$(CRAY_CPU_TARGET)/lapack/3.70/libblas.a
+BLAS_LIBS        = $(KISTI_APPLIB1)/$(CRAY_CPU_TARGET)/lapack/3.7.0/libblas.a
 BLAS_LIBS_SWITCH = external
 
 # If you have nothing better, use the local copy via "--with-netlib" :
@@ -139,10 +139,10 @@ BLAS_LIBS_SWITCH = external
 # For IBM machines with essl (-D__ESSL): load essl BEFORE lapack !
 # remember that LAPACK_LIBS precedes BLAS_LIBS in loading order
 
-LAPACK_LIBS        = $(KISTI_APPLIB1)/$(CRAY_CPU_TARGET)/lapack/3.70/liblapack.a
+LAPACK_LIBS        = $(KISTI_APPLIB1)/$(CRAY_CPU_TARGET)/lapack/3.7.0/liblapack.a
 LAPACK_LIBS_SWITCH = external
 
-SCALAPACK_LIBS     = $(HOME)/build/$(COMPILER)/$(COMPILER_VER)/$(CRAY_CPU_TARGET)/scalapack/2.0.2/libscalapack.a
+SCALAPACK_LIBS     = $(HOME)/benchmark/lib/$(COMPILER)/$(COMPILER_VER)/$(MPI)/$(KISTI_MPI_VER)/$(CRAY_CPU_TARGET)/scalapack/2.0.2/libscalapack.a
 
 # nothing needed here if the the internal copy of FFTW is compiled
 # (needs -D__FFTW in DFLAGS)

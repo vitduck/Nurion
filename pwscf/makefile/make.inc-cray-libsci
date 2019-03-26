@@ -141,7 +141,7 @@ BLAS_LIBS_SWITCH = external
 LAPACK_LIBS        = 
 LAPACK_LIBS_SWITCH = external
 
-SCALAPACK_LIBS     = -L$(CRAY_LIBSCI_PREFIX_DIR)/lib -lsci_cray_mpi
+SCALAPACK_LIBS     = 
 
 # nothing needed here if the the internal copy of FFTW is compiled
 # (needs -D__FFTW in DFLAGS)
