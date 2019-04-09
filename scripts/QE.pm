@@ -7,9 +7,11 @@ use Env::Modulecmd;
 use Capture::Tiny 'capture_stderr';
 use File::Slurp 'read_file'; 
 
-our @ISA       = qw/Exporter/; 
-our @EXPORT    = qw/run_pwscf/; 
-our @EXPORT_OK = (); 
+use Nurion qw( ldd );
+
+our @ISA       = qw( Exporter ); 
+our @EXPORT    = ();  
+our @EXPORT_OK = qw( run_pwscf profile_pwscf parallel_benchmark );  
 
 sub run_pwscf { 
     my ($nrepeat, $bin, $input, $nk, $ntg, $nd, $outdir) = @_; 
@@ -33,6 +35,44 @@ sub run_pwscf {
     } else { 
         system "mpirun $bin -nk $nk -ntg $ntg -nd $nd -inp $input > ./$output ";
     }
+}
+
+sub profile_pwscf { 
+    my ( $bin, $input, $nk, $ntg, $nd, $vtune_dir ) = @_; 
+    
+    # output file 
+    ( my $output = $input ) =~ s/(.+)\.in/$1.out/;
+
+    system "mpirun amplxe-cl -quiet -collect hotspots -trace-mpi -result-dir $vtune_dir " .
+           "$bin -nk $nk -ntg $ntg -nd $nd -inp $input > ./$output ";
+}
+
+sub parallel_benchmark { 
+    my ( $qe, $param ) = @_;  
+
+    ldd( $qe ); 
+
+    for my $nk ( $param->{nk}->@* ) { 
+        for my $ntg ( $param->{ntg}->@* ) { 
+            for my $nd ( $param->{nd}{$nk}->@* ) {
+                my $outdir = "$nk-$ntg-$nd"; 
+                
+                run_pwscf( $param->{n}, $qe, $param->{inp}, $nk, $ntg, $nd, $outdir ); 
+                system "qstat -f $ENV{PBS_JOBID} > $outdir/$ENV{PBS_JOBID}.dat";
+            }
+        }
+    }
+
+    clean_wfc(); 
+    clean_mix(); 
+}
+
+sub clean_wfc { 
+    unlink <*wfc*>; 
+}
+
+sub clean_mix { 
+    unlink <*mix*>; 
 }
 
 1; 

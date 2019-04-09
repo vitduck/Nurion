@@ -6,9 +6,9 @@ use warnings;
 use Env::Modulecmd;
 use Capture::Tiny 'capture_stderr';
 
-our @ISA       = qw/Exporter/; 
-our @EXPORT    = qw/module_init module_load_cpu module_load_env/; 
-our @EXPORT_OK = (); 
+our @ISA       = qw(Exporter); 
+our @EXPORT    = qw(module_init module_load_cpu module_load_env); 
+our @EXPORT_OK = qw(ldd); 
 
 our %cpu = ( 
     'mic-knl'     => 'craype-mic-knl', 
@@ -16,18 +16,23 @@ our %cpu = (
 ); 
 
 our %env = ( 
-    intel => [ 'intel/18.0.3', 
-               'impi/18.0.3' ],  
-
-    cray  => [ 'cce/8.6.3', 
-               'PrgEnv-cray/1.0.2', 
-               'cray-libsci/17.09.1', 
-               'cray-fftw_impi/3.3.6.2' ], 
-
-    gnu   => [ 'gcc/7.2.0', 
-               'openmpi/3.1.0', 
-               'lapack/3.7.0', 
-               'fftw_mpi/3.3.7' ],
+    intel => [ 
+        'intel/18.0.3', 
+        'impi/18.0.3',    
+        'vtune/18.0.3' 
+    ],
+    cray => [ 
+        'cce/8.6.3', 
+        'PrgEnv-cray/1.0.2', 
+        'cray-libsci/17.09.1', 
+        'cray-fftw_impi/3.3.6.2' 
+    ], 
+    gnu  => [ 
+        'gcc/7.2.0', 
+        'openmpi/3.1.0', 
+        'lapack/3.7.0', 
+        'fftw_mpi/3.3.7' 
+    ],
 ); 
 
 sub module_list { 
@@ -67,5 +72,13 @@ sub module_load_env {
     my @current = module_list(); 
     print "Modules: @current\n"; 
 } 
+
+sub ldd { 
+    my $bin = shift; 
+
+    system "echo Build: $bin >  link.dat"; 
+    system "echo Linking:    >> link.dat";  
+    system "ldd $bin         >> link.dat"; 
+}
 
 1; 

@@ -1,0 +1,22 @@
+--- ../../../../../build/intel/FFTXlib/scatter_mod.f90	2018-06-30 01:21:56.000000000 +0900
++++ scatter_mod.f90	2019-03-26 09:59:23.000000000 +0900
+@@ -45,6 +45,9 @@
+ !
+ !-----------------------------------------------------------------------
+ SUBROUTINE fft_scatter_xy ( desc, f_in, f_aux, nxx_, isgn )
++#if defined __CRAY
++!DIR$ OPTIMIZE(-hthread1)
++#endif
+   !-----------------------------------------------------------------------
+   !
+   ! transpose of the fft xy planes across the desc%comm2 communicator
+@@ -294,6 +297,9 @@
+ !
+ !-----------------------------------------------------------------------
+ SUBROUTINE fft_scatter_yz ( desc, f_in, f_aux, nxx_, isgn )
++#if defined __CRAY
++!DIR$ OPTIMIZE(-hthread1)
++#endif
+   !-----------------------------------------------------------------------
+   !
+   ! transpose of the fft yz planes across the desc%comm3 communicator
