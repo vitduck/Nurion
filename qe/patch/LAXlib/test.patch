@@ -1,0 +1,349 @@
+--- ../../../../02-qe/build/q-e-qe-6.3MaX/LAXlib/test.f90	2018-06-30 01:21:56.000000000 +0900
++++ test.f90	2019-04-11 11:36:23.000000000 +0900
+@@ -84,6 +84,11 @@
+      IF( TRIM( arg ) == '-n' ) THEN
+         CALL get_command_argument(i+1, arg)
+         READ( arg, * ) n_in
++    END IF 
++    
++    IF( TRIM( arg ) == '-ndiag' ) THEN
++        CALL get_command_argument(i+1, arg)
++        READ( arg, * ) nproc_ortho
+      END IF
+   end do
+ 
+@@ -142,6 +147,7 @@
+     write(6,*)
+     write(6,*) 'matrix size = ', n, ' x ', n
+     write(6,*) 'num. procs  = ', npes
++    write(6,*) 'num. ortho  = ', nproc_ortho
+     write(6,*) 'thr x proc  = ', omp_get_max_threads()
+     write(6,*)
+ 
+@@ -188,142 +194,142 @@
+     end do
+   end if
+   
+-  allocate( perf_matrix( nnodes, nnodes ) )
+-  allocate( latency_matrix( nnodes, nnodes ) )
+-  allocate( perf_count( nnodes, nnodes ) )
+-  perf_matrix = 0.0d0
+-  latency_matrix = 0.0d0
+-  perf_count = 0
+-
+-  ! Check core speed
+-  !
+-#if defined(__MPI)
+-  CALL MPI_BARRIER( MPI_COMM_WORLD, ierr)
+-#endif
+-  nx = 1024
+-  ALLOCATE( s( nx, nx ) )
+-  ALLOCATE( a( nx, nx ) )
+-  ALLOCATE( c( nx, nx ) )
+-  ALLOCATE( tempo_tutti( npes ) )
+-  tempo_tutti = 0.0d0
+-  a = 1.0d0
+-  s = 1.0d0
+-  c = 1.0d0
+-  CALL dgemm('n', 'n', nx, nx, nx, 1.0d0, A, nx, s, nx, 1.0d0, C, nx)
+-#if defined(__MPI)
+-  tempo(1) = MPI_WTIME()
+-#endif
+-  CALL dgemm('n', 'n', nx, nx, nx, 1.0d0, A, nx, s, nx, 1.0d0, C, nx)
+-  CALL dgemm('n', 'n', nx, nx, nx, 1.0d0, A, nx, s, nx, 1.0d0, C, nx)
+-  CALL dgemm('n', 'n', nx, nx, nx, 1.0d0, A, nx, s, nx, 1.0d0, C, nx)
+-  CALL dgemm('n', 'n', nx, nx, nx, 1.0d0, A, nx, s, nx, 1.0d0, C, nx)
+-  CALL dgemm('n', 'n', nx, nx, nx, 1.0d0, A, nx, s, nx, 1.0d0, C, nx)
+-#if defined(__MPI)
+-  tempo(2) = MPI_WTIME()
+-#endif
+-  DEALLOCATE( s )
+-  DEALLOCATE( a )
+-  DEALLOCATE( c )
+-  tempo_tutti(mype+1) = tempo(2)-tempo(1)
+-#if defined(__MPI)
+-  CALL MPI_ALLREDUCE( MPI_IN_PLACE, tempo_tutti, npes, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, ierr )
+-#endif
+-  if( mype == 0 ) then
+-     write(6,*)
+-     write(6,*)
+-     write(6,*)
+-     write(6,*) '+-----------------------------------+'
+-     write(6,*) '|    measured task performances     |'
+-     write(6,*) '+-----------------------------------+'
+-     do i = 1, npes
+-        write(6,300)  i, 5.0d0*DBLE(nx*nx*nx)*2.0d0/tempo_tutti(i)/1.0D+9, proc_name(i)
+-     end do
+-  end if
+-300 FORMAT('pe = ',I5,',', F8.3, ' GFlops', ',  node: ', A20) 
+-  !
+-  ! Check network speed
+-  !
+-  nx = 2048
+-  ALLOCATE( s( nx, nx ) )
+-  tempo_tutti = 0.0d0
+-
+-  do ii = 0, npes-1
+-  do i = 0, ii-1
+-     sour = ii
+-     dest = i
+-     tag = i + ii * npes
+-#if defined(__MPI)
+-     CALL MPI_BARRIER( MPI_COMM_WORLD, ierr)
+-     if( ( mype == sour ) .or. ( mype == dest ) ) THEN
+-        tempo(1) = MPI_WTIME()
+-        if( mype == dest ) then
+-           CALL MPI_SEND(s, nx*nx, MPI_DOUBLE_PRECISION, sour, TAG, MPI_COMM_WORLD, ierr)
+-           CALL MPI_RECV(s, nx*nx, MPI_DOUBLE_PRECISION, sour, TAG+NPES*NPES, MPI_COMM_WORLD, status, ierr)
+-        else if( mype == sour ) then
+-           CALL MPI_RECV(s, nx*nx, MPI_DOUBLE_PRECISION, dest, TAG, MPI_COMM_WORLD, status, ierr)
+-           CALL MPI_SEND(s, nx*nx, MPI_DOUBLE_PRECISION, dest, TAG+NPES*NPES, MPI_COMM_WORLD, ierr)
+-        endif
+-        tempo(2) = MPI_WTIME()
+-        perf_matrix( proc2node( ii+1 ), proc2node( i+1 ) ) = perf_matrix( proc2node( ii+1 ), proc2node( i+1 ) ) + &
+-           2.0d0*DBLE(nx*nx)*8.0d0/(tempo(2)-tempo(1))/1.0D+9
+-        perf_count( proc2node( ii+1 ), proc2node( i+1 ) ) = perf_count( proc2node( ii+1 ), proc2node( i+1 ) ) + 1
+-     END IF
+-     CALL MPI_BARRIER( MPI_COMM_WORLD, ierr)
+-     if( ( mype == sour ) .or. ( mype == dest ) ) THEN
+-        tempo(1) = MPI_WTIME()
+-        if( mype == dest ) then
+-           CALL MPI_SEND(ii, 1, MPI_BYTE, sour, TAG, MPI_COMM_WORLD, ierr)
+-           CALL MPI_RECV(ii, 1, MPI_BYTE, sour, TAG+NPES, MPI_COMM_WORLD, status, ierr)
+-        else if( mype == sour ) then
+-           CALL MPI_RECV(ii, 1, MPI_BYTE, dest, TAG, MPI_COMM_WORLD, status, ierr)
+-           CALL MPI_SEND(ii, 1, MPI_BYTE, dest, TAG+NPES, MPI_COMM_WORLD, ierr)
+-        endif
+-        tempo(2) = MPI_WTIME()
+-        latency_matrix( proc2node( ii+1 ), proc2node( i+1 ) ) = latency_matrix( proc2node( ii+1 ), proc2node( i+1 ) ) + &
+-           (tempo(2)-tempo(1))
+-     END IF
+-#endif
+-  end do
+-  end do
+-#if defined(__MPI)
+-  CALL MPI_ALLREDUCE( MPI_IN_PLACE, perf_matrix, SIZE(perf_matrix), MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, ierr )
+-  CALL MPI_ALLREDUCE( MPI_IN_PLACE, latency_matrix, SIZE(latency_matrix), MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, ierr )
+-  CALL MPI_ALLREDUCE( MPI_IN_PLACE, perf_count, SIZE(perf_count), MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD, ierr )
+-#endif
+-  if( mype == 0 ) then
+-     write(6,*)
+-     write(6,*)
+-     write(6,*)
+-     write(6,*) '+-----------------------------------+'
+-     write(6,*) '|    ping-pong network bandwidth    |'
+-     write(6,*) '+-----------------------------------+'
+-     write(6,*) 
+-     do ii = 1, nnodes
+-        do i = 1, nnodes
+-           if( perf_count(i,ii) > 0 ) then
+-             perf_matrix(i,ii) = perf_matrix(i,ii) / perf_count(i,ii)
+-             write( 6, 314 ) node_name(i), node_name(ii), perf_count(i,ii), perf_matrix(i,ii)
+-           end if
+-        end do
+-     end do
+-314 FORMAT( A20, A20, I5, ':', F8.3, 'GBytes') 
+-     write(6,*)
+-     write(6,*) '+-----------------------------------+'
+-     write(6,*) '|    ping-pong network latency      |'
+-     write(6,*) '+-----------------------------------+'
+-     write(6,*) 
+-     do ii = 1, nnodes
+-        do i = 1, nnodes
+-           if( perf_count(i,ii) > 0 ) then
+-             latency_matrix(i,ii) = latency_matrix(i,ii) / perf_count(i,ii)
+-             write( 6, 315 ) node_name(i), node_name(ii), perf_count(i,ii), latency_matrix(i,ii)*1000000.0d0
+-           end if
+-        end do
+-     end do
+-315 FORMAT( A20, A20, I5, ':', F10.3, 'usec') 
+-  end if
+-  DEALLOCATE( s )
+-  DEALLOCATE( tempo_tutti )
++!   allocate( perf_matrix( nnodes, nnodes ) )
++  ! allocate( latency_matrix( nnodes, nnodes ) )
++  ! allocate( perf_count( nnodes, nnodes ) )
++  ! perf_matrix = 0.0d0
++  ! latency_matrix = 0.0d0
++  ! perf_count = 0
++
++  ! ! Check core speed
++  ! !
++! #if defined(__MPI)
++  ! CALL MPI_BARRIER( MPI_COMM_WORLD, ierr)
++! #endif
++  ! nx = 1024
++  ! ALLOCATE( s( nx, nx ) )
++  ! ALLOCATE( a( nx, nx ) )
++  ! ALLOCATE( c( nx, nx ) )
++  ! ALLOCATE( tempo_tutti( npes ) )
++  ! tempo_tutti = 0.0d0
++  ! a = 1.0d0
++  ! s = 1.0d0
++  ! c = 1.0d0
++  ! CALL dgemm('n', 'n', nx, nx, nx, 1.0d0, A, nx, s, nx, 1.0d0, C, nx)
++! #if defined(__MPI)
++  ! tempo(1) = MPI_WTIME()
++! #endif
++  ! CALL dgemm('n', 'n', nx, nx, nx, 1.0d0, A, nx, s, nx, 1.0d0, C, nx)
++  ! CALL dgemm('n', 'n', nx, nx, nx, 1.0d0, A, nx, s, nx, 1.0d0, C, nx)
++  ! CALL dgemm('n', 'n', nx, nx, nx, 1.0d0, A, nx, s, nx, 1.0d0, C, nx)
++  ! CALL dgemm('n', 'n', nx, nx, nx, 1.0d0, A, nx, s, nx, 1.0d0, C, nx)
++  ! CALL dgemm('n', 'n', nx, nx, nx, 1.0d0, A, nx, s, nx, 1.0d0, C, nx)
++! #if defined(__MPI)
++  ! tempo(2) = MPI_WTIME()
++! #endif
++  ! DEALLOCATE( s )
++  ! DEALLOCATE( a )
++  ! DEALLOCATE( c )
++  ! tempo_tutti(mype+1) = tempo(2)-tempo(1)
++! #if defined(__MPI)
++  ! CALL MPI_ALLREDUCE( MPI_IN_PLACE, tempo_tutti, npes, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, ierr )
++! #endif
++  ! if( mype == 0 ) then
++     ! write(6,*)
++     ! write(6,*)
++     ! write(6,*)
++     ! write(6,*) '+-----------------------------------+'
++     ! write(6,*) '|    measured task performances     |'
++     ! write(6,*) '+-----------------------------------+'
++     ! do i = 1, npes
++        ! write(6,300)  i, 5.0d0*DBLE(nx*nx*nx)*2.0d0/tempo_tutti(i)/1.0D+9, proc_name(i)
++     ! end do
++  ! end if
++! 300 FORMAT('pe = ',I5,',', F8.3, ' GFlops', ',  node: ', A20) 
++  ! !
++  ! ! Check network speed
++  ! !
++  ! nx = 2048
++  ! ALLOCATE( s( nx, nx ) )
++  ! tempo_tutti = 0.0d0
++
++  ! do ii = 0, npes-1
++  ! do i = 0, ii-1
++     ! sour = ii
++     ! dest = i
++     ! tag = i + ii * npes
++! #if defined(__MPI)
++     ! CALL MPI_BARRIER( MPI_COMM_WORLD, ierr)
++     ! if( ( mype == sour ) .or. ( mype == dest ) ) THEN
++        ! tempo(1) = MPI_WTIME()
++        ! if( mype == dest ) then
++           ! CALL MPI_SEND(s, nx*nx, MPI_DOUBLE_PRECISION, sour, TAG, MPI_COMM_WORLD, ierr)
++           ! CALL MPI_RECV(s, nx*nx, MPI_DOUBLE_PRECISION, sour, TAG+NPES*NPES, MPI_COMM_WORLD, status, ierr)
++        ! else if( mype == sour ) then
++           ! CALL MPI_RECV(s, nx*nx, MPI_DOUBLE_PRECISION, dest, TAG, MPI_COMM_WORLD, status, ierr)
++           ! CALL MPI_SEND(s, nx*nx, MPI_DOUBLE_PRECISION, dest, TAG+NPES*NPES, MPI_COMM_WORLD, ierr)
++        ! endif
++        ! tempo(2) = MPI_WTIME()
++        ! perf_matrix( proc2node( ii+1 ), proc2node( i+1 ) ) = perf_matrix( proc2node( ii+1 ), proc2node( i+1 ) ) + &
++           ! 2.0d0*DBLE(nx*nx)*8.0d0/(tempo(2)-tempo(1))/1.0D+9
++        ! perf_count( proc2node( ii+1 ), proc2node( i+1 ) ) = perf_count( proc2node( ii+1 ), proc2node( i+1 ) ) + 1
++     ! END IF
++     ! CALL MPI_BARRIER( MPI_COMM_WORLD, ierr)
++     ! if( ( mype == sour ) .or. ( mype == dest ) ) THEN
++        ! tempo(1) = MPI_WTIME()
++        ! if( mype == dest ) then
++           ! CALL MPI_SEND(ii, 1, MPI_BYTE, sour, TAG, MPI_COMM_WORLD, ierr)
++           ! CALL MPI_RECV(ii, 1, MPI_BYTE, sour, TAG+NPES, MPI_COMM_WORLD, status, ierr)
++        ! else if( mype == sour ) then
++           ! CALL MPI_RECV(ii, 1, MPI_BYTE, dest, TAG, MPI_COMM_WORLD, status, ierr)
++           ! CALL MPI_SEND(ii, 1, MPI_BYTE, dest, TAG+NPES, MPI_COMM_WORLD, ierr)
++        ! endif
++        ! tempo(2) = MPI_WTIME()
++        ! latency_matrix( proc2node( ii+1 ), proc2node( i+1 ) ) = latency_matrix( proc2node( ii+1 ), proc2node( i+1 ) ) + &
++           ! (tempo(2)-tempo(1))
++     ! END IF
++! #endif
++  ! end do
++  ! end do
++! #if defined(__MPI)
++  ! CALL MPI_ALLREDUCE( MPI_IN_PLACE, perf_matrix, SIZE(perf_matrix), MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, ierr )
++  ! CALL MPI_ALLREDUCE( MPI_IN_PLACE, latency_matrix, SIZE(latency_matrix), MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD, ierr )
++  ! CALL MPI_ALLREDUCE( MPI_IN_PLACE, perf_count, SIZE(perf_count), MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD, ierr )
++! #endif
++  ! if( mype == 0 ) then
++     ! write(6,*)
++     ! write(6,*)
++     ! write(6,*)
++     ! write(6,*) '+-----------------------------------+'
++     ! write(6,*) '|    ping-pong network bandwidth    |'
++     ! write(6,*) '+-----------------------------------+'
++     ! write(6,*) 
++     ! do ii = 1, nnodes
++        ! do i = 1, nnodes
++           ! if( perf_count(i,ii) > 0 ) then
++             ! perf_matrix(i,ii) = perf_matrix(i,ii) / perf_count(i,ii)
++             ! write( 6, 314 ) node_name(i), node_name(ii), perf_count(i,ii), perf_matrix(i,ii)
++           ! end if
++        ! end do
++     ! end do
++! 314 FORMAT( A20, A20, I5, ':', F8.3, 'GBytes') 
++     ! write(6,*)
++     ! write(6,*) '+-----------------------------------+'
++     ! write(6,*) '|    ping-pong network latency      |'
++     ! write(6,*) '+-----------------------------------+'
++     ! write(6,*) 
++     ! do ii = 1, nnodes
++        ! do i = 1, nnodes
++           ! if( perf_count(i,ii) > 0 ) then
++             ! latency_matrix(i,ii) = latency_matrix(i,ii) / perf_count(i,ii)
++             ! write( 6, 315 ) node_name(i), node_name(ii), perf_count(i,ii), latency_matrix(i,ii)*1000000.0d0
++           ! end if
++        ! end do
++     ! end do
++! 315 FORMAT( A20, A20, I5, ':', F10.3, 'usec') 
++  ! end if
++  ! DEALLOCATE( s )
++!   DEALLOCATE( tempo_tutti )
+ 
+   call mp_start_diag()
+   !
+@@ -432,8 +438,8 @@
+   deallocate( proc_name )
+   deallocate( node_name )
+   deallocate( proc2node )
+-  deallocate( perf_matrix )
+-  deallocate( perf_count )
++!  deallocate( perf_matrix )
++!  deallocate( perf_count )
+ 
+ 
+ #if defined(__MPI)
+@@ -494,12 +500,14 @@
+ 
+     !  find the square closer (but lower) to nproc_try
+     !
+-    CALL grid2d_dims( 'S', nproc_try, np_ortho(1), np_ortho(2) )
++    !CALL grid2d_dims( 'S', nproc_try, np_ortho(1), np_ortho(2) )
+     !
+     !  now, and only now, it is possible to define the number of tasks
+     !  in the ortho group for parallel linear algebra
+     !
+-    nproc_ortho = np_ortho(1) * np_ortho(2)
++    !nproc_ortho = np_ortho(1) * np_ortho(2)
++    CALL get_ndiag( nproc_ortho, np_ortho(1), np_ortho(2) )
++
+     !
+     !  here we choose the first "nproc_ortho" processors
+     !
+@@ -615,6 +623,19 @@
+       RETURN
+    END SUBROUTINE set_a
+ 
++   SUBROUTINE get_ndiag( nproc_ortho, nprow, npcol ) 
++       IMPLICIT NONE 
++
++       INTEGER, INTENT(IN)  :: nproc_ortho
++       INTEGER, INTENT(OUT) :: nprow, npcol
++
++       INTEGER              :: sqrtnp
++
++       sqrtnp = INT( SQRT( REAL( nproc_ortho ) + 0.1 ) )
++
++       nprow  = sqrtnp
++       npcol  = sqrtnp
+ 
++   END SUBROUTINE get_ndiag
+ 
+ end program lax_test
