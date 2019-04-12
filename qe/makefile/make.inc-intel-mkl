@@ -30,7 +30,7 @@
 TOPDIR = $(dir $(abspath $(filter %make.inc,$(MAKEFILE_LIST))))
 # if it doesn't work, uncomment the following line (edit if needed):
 
-# TOPDIR = /scratch/pop19/02-qe/intel/02-opt/build
+# TOPDIR = /scratch/pop19/02-qe/intel/02-opt/02-elpa
 
 # DFLAGS  = precompilation options (possible arguments to -D and -U)
 #           used by the C compiler and preprocessor
@@ -42,7 +42,7 @@ TOPDIR = $(dir $(abspath $(filter %make.inc,$(MAKEFILE_LIST))))
 # MANUAL_DFLAGS  = additional precompilation option(s), if desired
 #                  BEWARE: it does not work for IBM xlf! Manually edit FDFLAGS
 MANUAL_DFLAGS  =
-DFLAGS         =  -D__DFTI -D__MPI -D__SCALAPACK
+DFLAGS         =  -D__DFTI -D__MPI -D__SCALAPACK 
 FDFLAGS        = $(DFLAGS) $(MANUAL_DFLAGS)
 
 # IFLAGS = how to locate directories with *.h or *.f90 file to be included
@@ -51,8 +51,7 @@ FDFLAGS        = $(DFLAGS) $(MANUAL_DFLAGS)
 # for libxc add -I/path/to/libxc/include/
 
 IFLAGS         = -I$(TOPDIR)/include -I$(TOPDIR)/FoX/finclude -I$(TOPDIR)/S3DE/iotk/include/ \
-                 -I$(MKLROOT)/include
-
+                 -I/apps/compiler/intel/18.0.3/mkl/include 
 
 # MOD_FLAG = flag used by f90 compiler to locate modules
 
@@ -65,9 +64,9 @@ MOD_FLAG      = -I
 BASEMOD_FLAGS= $(MOD_FLAG)$(TOPDIR)/iotk/src \
                $(MOD_FLAG)$(TOPDIR)/Modules \
                $(MOD_FLAG)$(TOPDIR)/FFTXlib \
-               $(MOD_FLAG)$(TOPDIR)/LAXlib \
-               $(MOD_FLAG)$(TOPDIR)/UtilXlib \
-               $(MOD_FLAG)$(TOPDIR)/FoX/finclude
+	           $(MOD_FLAG)$(TOPDIR)/LAXlib \
+	           $(MOD_FLAG)$(TOPDIR)/UtilXlib \
+	           $(MOD_FLAG)$(TOPDIR)/FoX/finclude
 
 # Compilers: fortran-90, fortran-77, C
 # If a parallel compilation is desired, MPIF90 should be a fortran-90
@@ -92,8 +91,7 @@ CUDA_RUNTIME=
 # CUDA F90 Flags
 CUDA_F90FLAGS=
 
-# C preprocessor and preprocessing flags - for explicit preprocessing,
-# if needed (see the compilation rules above)
+ # C preprocessor and preprocessing flags - for explicit preprocessing, # if needed (see the compilation rules above)
 # preprocessing flags must include DFLAGS and IFLAGS
 
 CPP            = cpp
@@ -131,7 +129,8 @@ LD_LIBS        =
 # BLAS_LIBS = /your/path/to/espresso/LAPACK/blas.a
 # BLAS_LIBS_SWITCH = internal
 
-BLAS_LIBS        = -L$(MKLROOT)/lib/intel64 -lmkl_intel_lp64  -lmkl_intel_thread -lmkl_core
+BLAS_LIBS        = -L/apps/compiler/intel/18.0.3/mkl/lib/intel64 \
+                   -lmkl_intel_lp64  -lmkl_intel_thread -lmkl_core
 BLAS_LIBS_SWITCH = external
 
 # If you have nothing better, use the local copy via "--with-netlib" :
@@ -152,7 +151,7 @@ FFT_LIBS       =
 
 # HDF5
 HDF5_LIB = 
-FOX_LIB   = -L$(TOPDIR)/FoX/lib  -lFoX_dom -lFoX_sax -lFoX_wxml -lFoX_common\
+FOX_LIB  = -L$(TOPDIR)/FoX/lib  -lFoX_dom -lFoX_sax -lFoX_wxml -lFoX_common\
             -lFoX_utils -lFoX_fsys 
 FOX_FLAGS = -Ofast
 

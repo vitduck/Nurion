@@ -11,7 +11,7 @@ use Nurion qw( ldd );
 
 our @ISA       = qw( Exporter ); 
 our @EXPORT    = ();  
-our @EXPORT_OK = qw( run_pwscf profile_pwscf parallel_benchmark );  
+our @EXPORT_OK = qw( run_pwscf profile_pwscf parallel_benchmark linear_benchmark );  
 
 sub run_pwscf { 
     my ($nrepeat, $bin, $input, $nk, $ntg, $nd, $outdir) = @_; 
@@ -58,6 +58,8 @@ sub parallel_benchmark {
                 my $outdir = "$nk-$ntg-$nd"; 
                 
                 run_pwscf( $param->{n}, $qe, $param->{inp}, $nk, $ntg, $nd, $outdir ); 
+
+                # memory
                 system "qstat -f $ENV{PBS_JOBID} > $outdir/$ENV{PBS_JOBID}.dat";
             }
         }
@@ -67,6 +69,24 @@ sub parallel_benchmark {
     clean_mix(); 
 }
 
+sub linear_benchmark { 
+    my ( $bin, $matrix_size, $nproc_ortho ) = @_; 
+
+    my $pbs_log = "$ENV{PBS_JOBID}_$matrix_size"; 
+
+    if ( $nproc_ortho ) { 
+        system 'mpirun', $bin, '-n', $matrix_size, '-ndiag', $nproc_ortho; 
+        $pbs_log = "$pbs_log-$nproc_ortho.log"; 
+    } else { 
+        system 'mpirun', $bin, '-n', $matrix_size; 
+        $pbs_log = "$pbs_log.log"; 
+    }
+
+    # memory
+    system "qstat -f $ENV{PBS_JOBID} > $pbs_log"; 
+}
+
+# remove temp files
 sub clean_wfc { 
     unlink <*wfc*>; 
 }

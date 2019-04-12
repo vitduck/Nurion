@@ -1,6 +1,19 @@
 --- ../../../../02-qe/build/q-e-qe-6.3MaX/LAXlib/test.f90	2018-06-30 01:21:56.000000000 +0900
-+++ test.f90	2019-04-11 11:36:23.000000000 +0900
-@@ -84,6 +84,11 @@
++++ test.f90	2019-04-12 11:34:58.000000000 +0900
+@@ -21,6 +21,12 @@
+   INTEGER :: ortho_col_comm  = 0  ! communicator for the ortho col group
+   INTEGER :: ortho_comm_id= 0 ! id of the ortho_comm
+   INTEGER :: ortho_parent_comm  = 0  ! parent communicator from which ortho group has been created
++
++  INTEGER :: has_ndiag = 0
++  INTEGER :: ndiag_in  = 1
++    
++  CHARACTER(80) :: output
++
+   !
+ #if defined __SCALAPACK
+   INTEGER :: me_blacs   =  0  ! BLACS processor index starting from 0
+@@ -84,6 +90,12 @@
       IF( TRIM( arg ) == '-n' ) THEN
          CALL get_command_argument(i+1, arg)
          READ( arg, * ) n_in
@@ -8,11 +21,34 @@
 +    
 +    IF( TRIM( arg ) == '-ndiag' ) THEN
 +        CALL get_command_argument(i+1, arg)
-+        READ( arg, * ) nproc_ortho
++        READ( arg, * ) ndiag_in
++        has_ndiag = 1
       END IF
    end do
  
-@@ -142,6 +147,7 @@
+@@ -117,8 +129,20 @@
+ 
+ #endif
+ 
++#if defined(__MPI) 
++  IF ( has_ndiag ) THEN 
++    CALL grid2d_dims( 'S', ndiag_in, np_ortho(1), np_ortho(2) )
++  ELSE 
++    CALL grid2d_dims( 'S', MAX(npes,1), np_ortho(1), np_ortho(2) )
++  END IF
+ 
+-  OPEN ( unit = 6, file = TRIM('test.out'), status='unknown' )
++  nproc_ortho = np_ortho(1) * np_ortho(2)
++#endif
++
++  WRITE(output, '(A,1A,I0,1A,I0,A)'), 'test','_',n_in,'-',nproc_ortho,'.out'
++  
++  !OPEN ( unit = 6, file = TRIM('test.out'), status='unknown' )
++  OPEN ( unit = 6, file = output, status='unknown' )
+ 
+   !
+   !write(6,*) 'mype = ', mype, ' npes = ', npes
+@@ -142,6 +166,7 @@
      write(6,*)
      write(6,*) 'matrix size = ', n, ' x ', n
      write(6,*) 'num. procs  = ', npes
@@ -20,7 +56,7 @@
      write(6,*) 'thr x proc  = ', omp_get_max_threads()
      write(6,*)
  
-@@ -188,142 +194,142 @@
+@@ -188,142 +213,142 @@
      end do
    end if
    
@@ -299,7 +335,15 @@
  
    call mp_start_diag()
    !
-@@ -432,8 +438,8 @@
+@@ -352,7 +377,6 @@
+   tempo = 0.0d0
+   tempo_mio = 0.0d0
+   tempo_min = 0.0d0
+-  tempo_max = 0.0d0
+   tempo_avg = 0.0d0
+ 
+   CALL set_a()
+@@ -432,8 +456,8 @@
    deallocate( proc_name )
    deallocate( node_name )
    deallocate( proc2node )
@@ -310,7 +354,12 @@
  
  
  #if defined(__MPI)
-@@ -494,12 +500,14 @@
+@@ -490,17 +514,18 @@
+     !
+ #if defined __MPI
+ 
+-    nproc_try = MAX( npes, 1 )
++    !nproc_try = MAX( npes, 1 )
  
      !  find the square closer (but lower) to nproc_try
      !
@@ -322,28 +371,15 @@
      !
 -    nproc_ortho = np_ortho(1) * np_ortho(2)
 +    !nproc_ortho = np_ortho(1) * np_ortho(2)
-+    CALL get_ndiag( nproc_ortho, np_ortho(1), np_ortho(2) )
-+
      !
++
      !  here we choose the first "nproc_ortho" processors
      !
-@@ -615,6 +623,19 @@
+     color = 0
+@@ -615,6 +640,4 @@
        RETURN
     END SUBROUTINE set_a
  
-+   SUBROUTINE get_ndiag( nproc_ortho, nprow, npcol ) 
-+       IMPLICIT NONE 
-+
-+       INTEGER, INTENT(IN)  :: nproc_ortho
-+       INTEGER, INTENT(OUT) :: nprow, npcol
-+
-+       INTEGER              :: sqrtnp
-+
-+       sqrtnp = INT( SQRT( REAL( nproc_ortho ) + 0.1 ) )
-+
-+       nprow  = sqrtnp
-+       npcol  = sqrtnp
- 
-+   END SUBROUTINE get_ndiag
- 
+-
+-
  end program lax_test

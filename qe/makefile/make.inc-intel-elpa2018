@@ -51,8 +51,8 @@ FDFLAGS        = $(DFLAGS) $(MANUAL_DFLAGS)
 # for libxc add -I/path/to/libxc/include/
 
 IFLAGS         = -I$(TOPDIR)/include -I$(TOPDIR)/FoX/finclude -I$(TOPDIR)/S3DE/iotk/include/ \
-                 -I/apps/compiler/intel/18.0.3/mkl/include \
-                 -I/$(HOME)/benchmark/lib/$(COMPILER)/$(COMPILER_VER)/$(MPI)/$(KISTI_MPI_VER)/$(CRAY_CPU_TARGET)/elpa/2018.11.001/include/modules
+                 -I/$(HOME)/benchmark/lib/$(COMPILER)/$(COMPILER_VER)/$(MPI)/$(KISTI_MPI_VER)/$(CRAY_CPU_TARGET)/elpa/2018.11.001/include/modules \
+                 -I/apps/compiler/intel/18.0.3/mkl/include 
 
 # MOD_FLAG = flag used by f90 compiler to locate modules
 
@@ -144,7 +144,7 @@ LAPACK_LIBS    =
 LAPACK_LIBS_SWITCH = external
 
 SCALAPACK_LIBS = $(HOME)/benchmark/lib/$(COMPILER)/$(COMPILER_VER)/$(MPI)/$(KISTI_MPI_VER)/$(CRAY_CPU_TARGET)/elpa/2018.11.001/lib/libelpa.a \
-                 -lmkl_scalapack_lp64 -lmkl_blacs_intelmpi_lp64
+                  -lmkl_scalapack_lp64 -lmkl_blacs_intelmpi_lp64
 
 # nothing needed here if the the internal copy of FFTW is compiled
 # (needs -D__FFTW in DFLAGS)

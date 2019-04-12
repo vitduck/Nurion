@@ -68,6 +68,12 @@ sub module_load_env {
     for ( $env{$compiler}->@* ){ 
         Env::Modulecmd::load( $_ ); 
     }
+    
+    # cray
+    if ( $compiler =~ /cray/ ) { 
+        $ENV{MPI} = lc( $ENV{PE_MPI} ); 
+        $ENV{KISTI_MPI_VER} = $ENV{IMPI_VERSION}; 
+    }
 
     my @current = module_list(); 
     print "Modules: @current\n"; 
