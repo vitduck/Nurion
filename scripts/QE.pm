@@ -7,17 +7,17 @@ use Env::Modulecmd;
 use Capture::Tiny 'capture_stderr';
 use File::Slurp 'read_file'; 
 
-use Nurion qw( ldd );
+use Nurion qw( ldd pbs_log );
 
 our @ISA       = qw( Exporter ); 
 our @EXPORT    = ();  
-our @EXPORT_OK = qw( run_pwscf profile_pwscf parallel_benchmark linear_benchmark );  
+our @EXPORT_OK = qw( run_pwscf run_linear benchmark_pwscf benchmark_linear );  
 
 sub run_pwscf { 
     my ($nrepeat, $bin, $input, $nk, $ntg, $nd, $outdir) = @_; 
 
     # output file 
-    ( my $output = $input ) =~ s/(.+)\.in/$1.out/;
+    my $output = $input =~ s/(.+)\.in/$1.out/r;
 
     if ( $outdir ) { 
         mkdir $outdir unless -e $outdir; 
@@ -37,17 +37,7 @@ sub run_pwscf {
     }
 }
 
-sub profile_pwscf { 
-    my ( $bin, $input, $nk, $ntg, $nd, $vtune_dir ) = @_; 
-    
-    # output file 
-    ( my $output = $input ) =~ s/(.+)\.in/$1.out/;
-
-    system "mpirun amplxe-cl -quiet -collect hotspots -trace-mpi -result-dir $vtune_dir " .
-           "$bin -nk $nk -ntg $ntg -nd $nd -inp $input > ./$output ";
-}
-
-sub parallel_benchmark { 
+sub benchmark_pwscf { 
     my ( $qe, $param ) = @_;  
 
     ldd( $qe ); 
@@ -69,21 +59,47 @@ sub parallel_benchmark {
     clean_mix(); 
 }
 
-sub linear_benchmark { 
+sub run_linear { 
     my ( $bin, $matrix_size, $nproc_ortho ) = @_; 
 
-    my $pbs_log = "$ENV{PBS_JOBID}_$matrix_size"; 
+    my $prefix = "$ENV{PBS_JOBID}_$matrix_size"; 
 
     if ( $nproc_ortho ) { 
         system 'mpirun', $bin, '-n', $matrix_size, '-ndiag', $nproc_ortho; 
-        $pbs_log = "$pbs_log-$nproc_ortho.log"; 
+        pbs_log( "$prefix-$nproc_ortho.log" );  
     } else { 
         system 'mpirun', $bin, '-n', $matrix_size; 
-        $pbs_log = "$pbs_log.log"; 
+        pbs_log( "$prefix.log" );  
     }
+}
 
-    # memory
-    system "qstat -f $ENV{PBS_JOBID} > $pbs_log"; 
+sub benchmark_linear { 
+    my ( $la, $param ) = @_; 
+
+    for my $size ( $param->{size}->@* ) { 
+        for my $ndiag ( $param->{ndiag}->@* ) { 
+            for my $stat ( 1 .. $param->{stat} ) { 
+                run_linear( $la, $size, $ndiag ); 
+
+                # rename output file if required
+                if ( $param->{stat} == 1 ) { 
+                    next; 
+                } else { 
+                    rename "test_$size-$ndiag.out" => "test_$size-$ndiag-$stat.out"
+                }
+            }
+        }
+    }
+}
+
+sub profile_pwscf { 
+    my ( $bin, $input, $nk, $ntg, $nd, $vtune_dir ) = @_; 
+    
+    # output file 
+    my $output = $input =~ s/(.+)\.in/$1.out/r;
+
+    system "mpirun amplxe-cl -quiet -collect hotspots -trace-mpi -result-dir $vtune_dir " .
+           "$bin -nk $nk -ntg $ntg -nd $nd -inp $input > ./$output ";
 }
 
 # remove temp files

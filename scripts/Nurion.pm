@@ -8,7 +8,7 @@ use Capture::Tiny 'capture_stderr';
 
 our @ISA       = qw(Exporter); 
 our @EXPORT    = qw(module_init module_load_cpu module_load_env); 
-our @EXPORT_OK = qw(ldd); 
+our @EXPORT_OK = qw(ldd pbs_log ); 
 
 our %cpu = ( 
     'mic-knl'     => 'craype-mic-knl', 
@@ -85,6 +85,12 @@ sub ldd {
     system "echo Build: $bin >  link.dat"; 
     system "echo Linking:    >> link.dat";  
     system "ldd $bin         >> link.dat"; 
+}
+
+sub pbs_log { 
+    my $log = shift // "$ENV{PBS_JOBID}.dat"; 
+
+    system "qstat -f $ENV{PBS_JOBID} > $log";  
 }
 
 1; 
