@@ -7,8 +7,8 @@ use Env::Modulecmd;
 use Capture::Tiny 'capture_stderr';
 
 our @ISA       = qw(Exporter); 
-our @EXPORT    = qw(module_init module_load_cpu module_load_env); 
-our @EXPORT_OK = qw(ldd pbs_log ); 
+our @EXPORT    = qw(ldd pbs_log module_init module_load_cpu module_load_env); 
+our @EXPORT_OK = (); 
 
 our %cpu = ( 
     'mic-knl'     => 'craype-mic-knl', 
@@ -80,7 +80,7 @@ sub module_load_env {
 } 
 
 sub ldd { 
-    my $bin = shift; 
+    my ( $bin ) = @_; 
 
     system "echo Build: $bin >  link.dat"; 
     system "echo Linking:    >> link.dat";  
@@ -88,6 +88,8 @@ sub ldd {
 }
 
 sub pbs_log { 
+    my ( $prefix, $outdir ) = @_; 
+
     my $log = shift // "$ENV{PBS_JOBID}.dat"; 
 
     system "qstat -f $ENV{PBS_JOBID} > $log";  

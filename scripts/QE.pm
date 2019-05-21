@@ -3,9 +3,8 @@ package QE;
 use strict; 
 use warnings; 
 
-use Env::Modulecmd;
-use Capture::Tiny 'capture_stderr';
 use File::Slurp 'read_file'; 
+use Data::Printer; 
 
 use Nurion qw( ldd pbs_log );
 
@@ -75,6 +74,9 @@ sub run_linear {
 
 sub benchmark_linear { 
     my ( $la, $param ) = @_; 
+
+    # debug
+    p $param; 
 
     for my $size ( $param->{size}->@* ) { 
         for my $ndiag ( $param->{ndiag}->@* ) { 
