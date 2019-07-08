@@ -1,4 +1,4 @@
-package QE; 
+package Nurion::QE; 
 
 use strict; 
 use warnings; 
@@ -6,11 +6,11 @@ use warnings;
 use File::Slurp 'read_file'; 
 use Data::Printer; 
 
-use Nurion qw( ldd pbs_log );
+use Env::Nurion qw( ldd pbs_log );
 
 our @ISA       = qw( Exporter ); 
 our @EXPORT    = ();  
-our @EXPORT_OK = qw( run_pwscf run_linear benchmark_pwscf benchmark_linear );  
+our @EXPORT_OK = qw( run_pwscf run_linear benchmark_pwscf benchmark_linear profile_pwscf );  
 
 sub run_pwscf { 
     my ($nrepeat, $bin, $input, $nk, $ntg, $nd, $outdir) = @_; 
@@ -100,7 +100,7 @@ sub profile_pwscf {
     # output file 
     my $output = $input =~ s/(.+)\.in/$1.out/r;
 
-    system "mpirun amplxe-cl -quiet -collect hotspots -trace-mpi -result-dir $vtune_dir " .
+    system "mpirun amplxe-cl -quiet -collect hotspots -trace-mpi -data-limit=0 -knob sampling-interval=1000 -result-dir $vtune_dir " .
            "$bin -nk $nk -ntg $ntg -nd $nd -inp $input > ./$output ";
 }
 

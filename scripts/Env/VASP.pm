@@ -1,4 +1,4 @@
-package VASP; 
+package Nurion::VASP; 
 
 use strict; 
 use warnings; 
@@ -7,7 +7,7 @@ use File::Slurp qw( read_file edit_file );
 use File::Copy  qw( move ); 
 use Data::Printer; 
 
-use Nurion qw( ldd pbs_log );
+use Env::Nurion qw( ldd pbs_log );
 
 our @ISA       = qw( Exporter ); 
 our @EXPORT    = ();  

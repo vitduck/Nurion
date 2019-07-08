@@ -1,4 +1,4 @@
-package Nurion; 
+package Env::Nurion; 
 
 use strict; 
 use warnings; 
@@ -7,7 +7,7 @@ use Env::Modulecmd;
 use Capture::Tiny 'capture_stderr';
 
 our @ISA       = qw(Exporter); 
-our @EXPORT    = qw(ldd pbs_log module_init module_load_cpu module_load_env); 
+our @EXPORT    = qw(ldd pbs_log module_init module_load module_list module_load_cpu module_load_env); 
 our @EXPORT_OK = (); 
 
 our %cpu = ( 
@@ -19,7 +19,8 @@ our %env = (
     intel => [ 
         'intel/18.0.3', 
         'impi/18.0.3',    
-        'vtune/18.0.3' 
+        'vtune/18.0.3', 
+        'fftw_mpi/3.3.7'
     ],
     cray => [ 
         'cce/8.6.3', 
@@ -45,32 +46,31 @@ sub module_list {
     return grep !/\d+\)/, @modules; 
 } 
 
+sub module_load { 
+    Env::Modulecmd::load($_) for @_
+}
+
+sub module_unload { 
+    Env::Modulecmd::unload($_) for @_
+}
+
 sub module_init { 
-    my @modules = module_list(); 
-    
-    for ( @modules ) { 
-        next if /craype-network-opa/; 
-        Env::Modulecmd::unload( $_)
-    } 
+    module_unload(grep !/craype-network-opa/, module_list()) 
 } 
 
 sub module_load_cpu { 
     my $target = shift; 
 
-    if ( exists $cpu{$target} ) {  
-        Env::Modulecmd::load( $cpu{$target} );
-    } 
+    module_load($cpu{$target}) if exists $cpu{$target}
 } 
 
 sub module_load_env { 
-    my $compiler = shift; 
+    my $preset = shift; 
 
-    for ( $env{$compiler}->@* ){ 
-        Env::Modulecmd::load( $_ ); 
-    }
-    
+    module_load($env{$preset}->@*); 
+
     # cray
-    if ( $compiler =~ /cray/ ) { 
+    if ( $preset =~ /cray/ ) { 
         $ENV{MPI} = lc( $ENV{PE_MPI} ); 
         $ENV{KISTI_MPI_VER} = $ENV{IMPI_VERSION}; 
     }
@@ -80,11 +80,10 @@ sub module_load_env {
 } 
 
 sub ldd { 
-    my ( $bin ) = @_; 
+    my ( $bin, $output ) = @_; 
 
-    system "echo Build: $bin >  link.dat"; 
-    system "echo Linking:    >> link.dat";  
-    system "ldd $bin         >> link.dat"; 
+    system "echo $bin >  $output"; 
+    system "ldd  $bin >> $output"; 
 }
 
 sub pbs_log { 
